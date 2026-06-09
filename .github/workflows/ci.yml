@@ -38,7 +38,8 @@ jobs:
           curl -sL -o /tmp/qb64pe.tar.gz \
             "https://github.com/QB64-Phoenix-Edition/QB64pe/releases/download/v${QB64PE_VERSION}/qb64pe_lnx-${QB64PE_VERSION}.tar.gz"
           mkdir -p ~/qb64pe
-          tar xzf /tmp/qb64pe.tar.gz -C ~/qb64pe --strip-components=1
+          # tarball entries are prefixed ./qb64pe/, hence two components
+          tar xzf /tmp/qb64pe.tar.gz -C ~/qb64pe --strip-components=2
           make -C ~/qb64pe -j"$(nproc)" OS=lnx BUILD_QB64=y
       - name: Compile src/WWTBAM.BAS
         run: |
