@@ -25,7 +25,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            g++ mesa-common-dev libglu1-mesa-dev libasound2-dev libcurl4-openssl-dev
+            g++ mesa-common-dev libglu1-mesa-dev libasound2-dev libcurl4-openssl-dev libpng-dev
       - name: Cache QB64-PE
         id: cache-qb64pe
         uses: actions/cache@v4
