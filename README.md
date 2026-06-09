@@ -4,6 +4,8 @@
     W W W W W W W W    T    B   B A   A M     M
     W     W W     W    T    BBBB  A   A M     M
 
+[![CI](https://github.com/brtkwr/WWTBAM/actions/workflows/ci.yml/badge.svg)](https://github.com/brtkwr/WWTBAM/actions/workflows/ci.yml)
+
 # Foreword
 
 This is one of the first ever program that I wrote in 2002 implemented in QBasic as I was learning to program. It tries its best to imitate `who wants to be a millionare` TV game show.
