@@ -47,3 +47,10 @@ You can then continue and install the program. But you may sometime get some err
 These are the reasons which may cause errors in the installation process. If you have cared for this errors and run the setup process and you get error, please report it to me on my website http://kunwar.funurl.com (***doesn't exist anymore***) or mail me on bharatkunwar@hotmail.com (***no longer in use***).
 
 Thank-you for choosing the software.
+# Source reconstruction (2026)
+
+The original QBasic source was lost, so it was reverse engineered back out of `WWTBAM.EXE`:
+
+- [`src/WWTBAM.BAS`](src/WWTBAM.BAS) - reconstructed QuickBASIC 4.5 source of the main game (all strings, money ladders, lifeline logic and DATA blocks recovered verbatim from the binary).
+- [`docs/REVERSE_ENGINEERING.md`](docs/REVERSE_ENGINEERING.md) - full write-up: the `.BBK` file masquerade, question bank format, registration scheme, money ladders and screenshots of the original EXE running in DOSBox.
+- [`assets/`](assets) - the data files unmasked into their true formats (fonts, the hidden BMP, question banks as plain text).
