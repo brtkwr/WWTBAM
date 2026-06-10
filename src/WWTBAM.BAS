@@ -54,13 +54,17 @@ RANDOMIZE TIMER
 country% = 1: age% = 1: curr$ = "Rs."
 
 ' --- registration state lives in help.BBK ---------------------------------
-' "100111110001" = registered, "011001011100" = unregistered
+' help.BBK holds the help-topic lines followed by a flag line:
+'   "011001011100" = registered, "100111110001" = unregistered
+' (verified by toggling the flag and observing the "Unregistered" banner).
 registered% = 0
 ON ERROR GOTO NoHelpFile
 OPEN "help.BBK" FOR INPUT AS #1
-LINE INPUT #1, rg$
+DO WHILE NOT EOF(1)
+  LINE INPUT #1, rg$
+  IF rg$ = "011001011100" THEN registered% = 1
+LOOP
 CLOSE #1
-IF rg$ = "100111110001" THEN registered% = 1
 SeenHelpFile:
 ON ERROR GOTO 0
 
@@ -527,7 +531,11 @@ SCREEN 12: CLS
 CenterText 1, " Unregistered Version !!! ", 14
 COLOR 11: LOCATE 10, 15: PRINT "Enter the registry code : ";
 LINE INPUT code$
-IF code$ <> "WWTBAM_KGOI_BBK_" THEN
+' The real check (recovered from the EXE at 0xBB1D / 0xBB86): the code must
+' start with the prefix AND the three characters after it must read 999 --
+' i.e.  INSTR(code$, "WWTBAM_KGOI_BBK_") = 1  AND  VAL(MID$(code$,17,3)) = 999.
+' The one valid code is therefore  WWTBAM_KGOI_BBK_999.
+IF INSTR(code$, "WWTBAM_KGOI_BBK_") <> 1 OR VAL(MID$(code$, 17, 3)) <> 999 THEN
   COLOR 12: LOCATE 13, 8
   PRINT "Your registry code is incorrect. Wan't to try registry again ? (y/n)"
   DO: q$ = LCASE$(INKEY$): LOOP UNTIL q$ = "y" OR q$ = "n"
@@ -542,7 +550,7 @@ LOCATE 17, 8: LINE INPUT pw$
 COLOR 13: LOCATE 19, 15: PRINT "Registering";
 FOR i% = 1 TO 6: PRINT "."; : FOR d& = 1 TO 80000: NEXT d&: NEXT i%
 OPEN "help.BBK" FOR OUTPUT AS #1
-PRINT #1, "100111110001"
+PRINT #1, "011001011100"            ' the "registered" flag
 CLOSE #1
 registered% = 1
 PRINT

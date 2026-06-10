@@ -105,17 +105,60 @@ QB compiler de-duplicates identical literals across the two ladders.)
 
 ## Registration scheme
 
-- The registry code is the literal **`WWTBAM_KGOI_BBK_`** (stored with a
-  trailing `$` sentinel in the EXE).
-- Registration state is persisted in `help.BBK` as one of two binary-looking
-  magic strings found side by side in the EXE: `100111110001` (registered)
-  vs `011001011100` (unregistered).
+### The registration key: `WWTBAM_KGOI_BBK_999`
+
+The key is a 16-character prefix plus a 3-digit number. Disassembling the
+registration routine shows the check is **not** a plain string compare:
+
+```
+0xBB19  mov ax,0x1508        ; offset of the literal "WWTBAM_KGOI_BBK_"
+0xBB1D  call <str compare>   ; does code$ start with the prefix?
+0xBB22  cmp ax,1 / jz 0xBB86 ; yes -> success branch
+...
+0xBB86  push code$, 17, 3     ; \
+0xBB92  call <MID$>           ;  | n = VAL(MID$(code$, 17, 3))
+0xBBA5  call <VAL>            ; /
+        ... FP-emulator compare of n against 999 ...
+0xBBF8  jmp 0xBB2D            ; n <> 999  -> "incorrect"
+0xBBFB  ...                   ; n  = 999  -> "correct"
+```
+
+In other words: `INSTR(code$, "WWTBAM_KGOI_BBK_") = 1` **and**
+`VAL(MID$(code$, 17, 3)) = 999`. That is why entering the bare prefix is
+rejected ("incorrect") — `MID$` of a 16-char string is empty, so `VAL` is 0.
+The constant `999` is stored as an IEEE single (`00 00 79 44`) at file offset
+`0x1efea`, just past the registry-code literal at `0x1ef8e`.
+
+(My first pass guessed the trailing `$` after the literal was part of the
+key — it is not. The literal is exactly 16 bytes; the `$` (`0x24`) is the
+low byte of the *next* string descriptor's pointer.)
+
+Verified end to end in DOSBox: Help → `7` (Register) → `WWTBAM_KGOI_BBK_999`
+→ "Your registry code is correct." → "registered successfully !!!".
+
+| Help & Support (topic 7 = Register) | Registering with the recovered key |
+|---|---|
+| ![help](screenshots/07-help-and-support.png) | ![registered](screenshots/08-registration-success.png) |
+
+### Registration state
+
+Persisted in `help.BBK` (which also holds the help-topic lines) as one of two
+binary-looking magic strings found side by side in the EXE. **The mapping is
+the opposite of what it looks like** — confirmed by writing each value and
+watching the banner:
+
+| Flag in `help.BBK` | Meaning |
+|---|---|
+| `011001011100` | **registered** |
+| `100111110001` | **unregistered** |
+
 - The unregistered version: shows the "Unregistered Version !!!" banner on
   every screen, disables the Question Maker and the random-question feature
   ("Kunwar's Automated Loader" picks questions in file order instead), and
   shows help topic 5 via `a32.exe` instead of `a31.exe`.
 - After a successful registration the program asks for an "adminstrator
-  password", counts 1… to 5… and restarts itself (`RUN`).
+  password" (stored, not validated), counts 1… to 5… and restarts itself
+  (`RUN`), which re-reads `help.BBK` and comes up registered.
 
 ## Lifelines
 

@@ -75,6 +75,18 @@ for name in ["WWTBAM.EXE", "QM.BBK", "A1.BBK", "A2.BBK", "A31.BBK", "A32.BBK", "
 for name in ["SETUP.EXE", "SETUP.DAT"]:
     check((ROOT / name).read_bytes()[:2] == b"MZ", f"{name}: MZ executable magic")
 
+# --- registration scheme (documented in docs/REVERSE_ENGINEERING.md) ---------
+# The registration key is WWTBAM_KGOI_BBK_999: the 16-byte prefix plus the
+# 3-digit number 999, which the EXE compares as VAL(MID$(code$,17,3)) against
+# an IEEE single stored at file offset 0x1EFEA. Lock these facts down so the
+# recovered key can't silently drift.
+exe = zf.read("WWTBAM.EXE")
+prefix = exe[0x1EF8E:0x1EF9E]
+check(prefix == b"WWTBAM_KGOI_BBK_", f"registry-code prefix at 0x1EF8E (got {prefix!r})")
+suffix = struct.unpack_from("<f", exe, 0x1EFEA)[0]
+check(suffix == 999.0, f"registry-code number constant at 0x1EFEA is 999 (got {suffix})")
+check(b"100111110001" in exe and b"011001011100" in exe, "both registration flags present in EXE")
+
 print()
 if failures:
     print(f"{len(failures)} check(s) failed")
